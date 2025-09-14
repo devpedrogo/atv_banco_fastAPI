@@ -1,11 +1,10 @@
 import sqlite3
-from typing import List, Optional
+from typing import List
 from enum import Enum
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-# --- Configurações do Banco de Dados ---
 DB_NAME = "blibioteca.db"
 
 
@@ -34,7 +33,6 @@ def init_db():
         conn.commit()
 
 
-# --- Modelos (BaseModel) ---
 
 class Categoria(Enum):
     romance = 1
@@ -66,16 +64,12 @@ class Livro(LivroBase):
     livro_status: Status = Status.ativo
 
 
-# --- Aplicação FastAPI ---
 app = FastAPI(docs_url="/docs", redoc_url="/redoc")
 
-# Inicializa o banco de dados quando a aplicação é iniciada
 @app.on_event("startup")
 def startup_event():
     init_db()
 
-
-# --- Endpoints da API ---
 
 @app.post("/livros/", response_model=Livro)
 def adicionar_livro(livro: LivroBase):
@@ -160,4 +154,5 @@ def excluir_livro(livro_id: int):
         conn.commit()
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Livro não encontrado.")
+
     return {"message": "Livro excluído logicamente com sucesso."}
